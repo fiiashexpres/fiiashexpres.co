@@ -94,7 +94,7 @@
       const phone = document.getElementById("phone").value.trim();
       const errorText = document.getElementById("errorText");
 
-      // ✅ ตรวจสอบรูปแบบเบอร์โทร
+      // ตรวจสอบรูปแบบเบอร์โทร (ต้องมี 10 หลัก)
       if (!/^0[0-9]{9}$/.test(phone)) {
         errorText.style.visibility = "visible";
         return;
@@ -103,15 +103,15 @@
       // ซ่อนข้อความผิดพลาด
       errorText.style.visibility = "hidden";
 
-      // ✅ เก็บเบอร์ลูกค้าใน localStorage
+      // ✅ เก็บเบอร์ลูกค้าไว้ใน localStorage
       localStorage.setItem("active_customer", phone);
 
-      // ✅ ถ้าไม่มีข้อมูลลูกค้านี้ → สร้างใหม่
+      // ✅ ถ้าไม่มีข้อมูลลูกค้านี้ ให้สร้างข้อมูลใหม่อัตโนมัติ
       let balances = JSON.parse(localStorage.getItem("customer_balances")) || {};
       if (!balances[phone]) balances[phone] = 0;
       localStorage.setItem("customer_balances", JSON.stringify(balances));
 
-      // ✅ ไปหน้า index.html โดยไม่แจ้งเตือนใด ๆ
+      // ✅ ไปหน้าแรกโดยไม่แสดง alert
       window.location.href = "index.html";
     }
   </script>
