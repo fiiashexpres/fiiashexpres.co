@@ -136,6 +136,21 @@
       if (!balances[phone]) balances[phone] = 0;
       localStorage.setItem("customer_balances", JSON.stringify(balances));
 
+// ✅ เพิ่มข้อมูลลูกค้าใหม่ลงฐานข้อมูลรวม customer_data
+let customerData = JSON.parse(localStorage.getItem("customer_data")) || {};
+
+if (!customerData[phone]) {
+  customerData[phone] = {
+    phone: phone,
+    createdAt: new Date().toLocaleString("th-TH"),
+    wallet_balance: balances[phone],
+    lastTransaction: "ยังไม่มีธุรกรรม"
+  };
+  localStorage.setItem("customer_data", JSON.stringify(customerData));
+}
+
+
+
       // ✅ จำลองโหลด 1.5 วิ แล้วเข้าเว็บหลัก
       setTimeout(() => {
         window.location.href = "index.html";

@@ -25,7 +25,7 @@
 
     .container {
       padding: 20px;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 20px auto;
       background: white;
       border-radius: 12px;
@@ -76,7 +76,6 @@
 
     .btn-green { background: #4CAF50; color: white; }
     .btn-red   { background: #f44336; color: white; }
-    .btn-yellow{ background: #ffeb3b; }
     .btn-blue  { background: #2196F3; color: white; }
 
     .logout {
@@ -106,16 +105,18 @@
   <div class="container">
     <h3>📱 รายชื่อลูกค้าทั้งหมด</h3>
 
-    <!-- 🔍 ช่องค้นหาเบอร์โทร -->
-    <input type="text" id="searchInput" placeholder="🔍 พิมพ์เบอร์โทรลูกค้าเพื่อค้นหา...">
+    <!-- 🔍 ช่องค้นหาเบอร์โทรหรือชื่อ -->
+    <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อหรือเบอร์โทรลูกค้าเพื่อค้นหา...">
 
     <!-- 📋 ตารางลูกค้า -->
     <table id="customerTable">
       <thead>
         <tr>
-          <th>เบอร์โทร</th>
+          <th>#</th>
+          <th>ชื่อ / เบอร์โทร<br><small>วันที่สมัคร</small></th>
           <th>ยอดเงินคงเหลือ</th>
           <th>ธุรกรรมล่าสุด</th>
+          <th>จำนวนธุรกรรม</th>
           <th colspan="3">จัดการ</th>
         </tr>
       </thead>
@@ -156,25 +157,41 @@
     function renderCustomers(filter = "") {
       customerTable.innerHTML = "";
 
-      const customers = Object.keys(balances).filter(phone =>
-        phone.includes(filter)
-      );
+      const customerData = JSON.parse(localStorage.getItem("customer_data")) || {};
+      const allPhones = Object.keys(balances);
+
+      // 🔍 รวมทั้งชื่อและเบอร์โทรในการค้นหา
+      const customers = allPhones.filter(phone => {
+        const info = customerData[phone];
+        const name = info && info.name ? info.name.toLowerCase() : "";
+        return (
+          phone.includes(filter) ||
+          name.includes(filter.toLowerCase())
+        );
+      });
 
       if (customers.length === 0) {
-        customerTable.innerHTML = `<tr><td colspan="6">❌ ไม่พบข้อมูลลูกค้า</td></tr>`;
+        customerTable.innerHTML = `<tr><td colspan="8">❌ ไม่พบข้อมูลลูกค้า</td></tr>`;
         return;
       }
 
-      customers.forEach(phone => {
+      customers.forEach((phone, index) => {
+        const info = customerData[phone];
+        const createdAt = info ? info.createdAt : "-";
+        const name = info && info.name ? info.name : "(ไม่มีชื่อ)";
+
         const key = `transactions_${phone}`;
         const tx = JSON.parse(localStorage.getItem(key)) || [];
         const latest = tx[0] ? `${tx[0].type} ${tx[0].amount}฿ (${tx[0].status})` : "-";
+        const txCount = tx.length;
 
         customerTable.innerHTML += `
           <tr>
-            <td>${phone}</td>
+            <td>${index + 1}</td>
+            <td><b>${name}</b><br>${phone}<br><small>${createdAt}</small></td>
             <td>${balances[phone].toLocaleString("th-TH", { minimumFractionDigits: 2 })}</td>
             <td>${latest}</td>
+            <td>${txCount}</td>
             <td><button class="btn-green" onclick="topUp('${phone}')">+ เติมเงิน</button></td>
             <td><button class="btn-red" onclick="withdraw('${phone}')">- ถอนเงิน</button></td>
             <td><button class="btn-blue" onclick="viewTransactions('${phone}')">ดูธุรกรรม</button></td>

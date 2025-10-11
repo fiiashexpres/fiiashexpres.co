@@ -2,9 +2,11 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="https://flashexpress.com/favicon.ico" type="image/x-icon">
-<title>Flash Express</title>
+<title>Flash Express | ยื่นคำร้องสำเร็จ</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
   font-family: "Prompt", sans-serif;
@@ -15,9 +17,11 @@ body {
   height: 100vh;
   margin: 0;
   overflow: hidden;
+  flex-direction: column;
+  text-align: center;
 }
 
-/* ✅ เอฟเฟกต์เช็ค */
+/* ✅ วงกลมเช็ค */
 .checkmark {
   width: 100px;
   height: 100px;
@@ -41,18 +45,20 @@ body {
   animation: draw 0.4s ease forwards 0.4s;
 }
 
-/* กล่องข้อความ */
+/* ✅ กล่องข้อความ */
 .container {
   background: white;
   border-radius: 16px;
-  padding: 30px;
+  padding: 25px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  width: 340px;
+  width: 90%;
+  max-width: 350px;
   opacity: 0;
   transform: translateY(30px);
   animation: fadeInUp 0.8s ease forwards;
-  animation-delay: 1s; /* แสดงหลังเช็คเสร็จ */
+  animation-delay: 1s;
+  box-sizing: border-box;
 }
 
 h2 {
@@ -69,7 +75,12 @@ img {
   width: 180px;
   border-radius: 12px;
   margin: 15px 0;
+  transition: transform 0.3s ease;
 }
+img:hover {
+  transform: scale(1.05);
+}
+
 button {
   background-color: #25D366;
   color: white;
@@ -80,12 +91,13 @@ button {
   cursor: pointer;
   margin-top: 10px;
   font-size: 16px;
+  transition: background-color 0.2s ease;
 }
 button:hover {
   background-color: #1ebe57;
 }
 
-/* เอฟเฟกต์เคลื่อนไหว */
+/* ✅ เอฟเฟกต์อนิเมชัน */
 @keyframes pop {
   0% { transform: scale(0); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
@@ -97,23 +109,69 @@ button:hover {
 @keyframes fadeInUp {
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* 📱 รองรับมือถือ */
+@media (max-width: 480px) {
+  .checkmark {
+    width: 80px;
+    height: 80px;
+  }
+  .checkmark::after {
+    width: 20px;
+    height: 40px;
+    border-right: 5px solid white;
+    border-bottom: 5px solid white;
+  }
+  h2 {
+    font-size: 18px;
+  }
+  p {
+    font-size: 14px;
+  }
+  img {
+    width: 150px;
+  }
+  button {
+    width: 100%;
+    font-size: 15px;
+  }
+}
 </style>
 </head>
+
 <body>
 
-  <div style="text-align:center;">
-    <!-- ✅ วงกลมเช็คอนิเมชัน -->
-    <div class="checkmark" id="check"></div>
+  <!-- ✅ วงกลมเช็ค -->
+  <div class="checkmark"></div>
 
-    <!-- ✅ กล่องข้อความจะแสดงหลังอนิเมชันเช็คเสร็จ -->
-    <div class="container">
-      <h2>✅ ยื่นคำร้องสำเร็จแล้ว</h2>
-      <p>เจ้าหน้าที่จะติดต่อกลับภายใน 24 ชั่วโมง</p>
-      <img src="https://qr-official.line.me/gs/M_965qjwhx_GW.png?oat_content=qr" alt="QR Line เจ้าหน้าที่">
-      <p>สแกน QR ด้านบนเพื่อติดต่อเจ้าหน้าที่ได้เลย</p>
-      <button onclick="window.open('https://lin.ee/SS2faED')">ติดต่อเจ้าหน้าที่</button>
-    </div>
+  <!-- ✅ กล่องข้อความ -->
+  <div class="container">
+    <h2>✅ ยื่นคำร้องสำเร็จแล้ว</h2>
+    <p>เจ้าหน้าที่จะติดต่อกลับภายใน 24 ชั่วโมง</p>
+    <img src="https://qr-official.line.me/gs/M_965qjwhx_GW.png?oat_content=qr" alt="QR Line เจ้าหน้าที่">
+    <p>สแกน QR ด้านบนเพื่อติดต่อเจ้าหน้าที่ได้เลย</p>
+    <button onclick="window.open('https://lin.ee/SS2faED', '_blank')">💬 ติดต่อเจ้าหน้าที่</button>
+    <button style="background:#ffeb3b;color:#000;margin-top:8px;" onclick="goHome()">🏠 กลับหน้าหลัก</button>
   </div>
+
+<script>
+  // ⏱ เพิ่มดีเลย์เล็กน้อยให้วงกลมและข้อความดูลื่นไหล
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      document.querySelector(".container").style.opacity = 1;
+    }, 1000);
+  });
+
+  // 🏠 กลับหน้าหลัก
+  function goHome() {
+    const btn = event.target;
+    btn.textContent = "🔄 กำลังกลับ...";
+    btn.style.opacity = "0.7";
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 700);
+  }
+</script>
 
 </body>
 </html>
