@@ -182,7 +182,6 @@
 
   // ✅ ตรวจสอบว่าลูกค้าเข้าสู่ระบบหรือยัง
   if (!activeCustomer) {
-    alert("⚠️ กรุณากรอกเบอร์โทรก่อนเข้าสู่ระบบ");
     window.location.href = "login-customer.html";
   } else {
     info.textContent = `เบอร์: ${activeCustomer}`;
