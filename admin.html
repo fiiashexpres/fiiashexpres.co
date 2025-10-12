@@ -17,16 +17,17 @@
     header {
       background: #ffeb3b;
       text-align: center;
-      padding: 15px;
+      padding: 18px;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 22px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .container {
       padding: 20px;
-      max-width: 1100px;
-      margin: 20px auto;
+      width: 90%;
+      max-width: 1200px;
+      margin: 25px auto;
       background: white;
       border-radius: 12px;
       box-shadow: 0 3px 6px rgba(0,0,0,0.1);
@@ -35,66 +36,87 @@
     h3 {
       text-align: center;
       color: #5e35b1;
+      font-size: 20px;
+      margin-top: 30px;
     }
 
     input[type="text"] {
       display: block;
       width: 90%;
-      max-width: 400px;
-      margin: 10px auto 25px;
-      padding: 10px;
+      max-width: 450px;
+      margin: 15px auto 30px;
+      padding: 12px;
       border-radius: 8px;
       border: 1px solid #ccc;
       text-align: center;
-      font-size: 14px;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #ffeb3b;
+      box-shadow: 0 0 5px #ffeb3b80;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 25px;
+      overflow-x: auto;
+      display: block;
     }
 
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
       font-size: 14px;
+      white-space: nowrap;
     }
 
     th {
       background: #ffeb3b;
+      font-weight: bold;
     }
 
     button {
       border: none;
       border-radius: 6px;
-      padding: 6px 10px;
+      padding: 7px 12px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 13px;
+      transition: 0.2s;
     }
 
     .btn-green { background: #4CAF50; color: white; }
+    .btn-green:hover { background: #43a047; }
     .btn-red   { background: #f44336; color: white; }
+    .btn-red:hover { background: #e53935; }
     .btn-blue  { background: #2196F3; color: white; }
+    .btn-blue:hover { background: #1e88e5; }
 
     .logout {
       display: block;
-      margin: 20px auto;
+      margin: 25px auto 10px;
       background: #ff5252;
       color: white;
       border: none;
       border-radius: 8px;
-      padding: 10px 20px;
+      padding: 12px 25px;
       font-weight: bold;
+      font-size: 15px;
       cursor: pointer;
+      transition: 0.2s;
     }
 
     .logout:hover { background: #e53935; }
 
     @media (max-width: 600px) {
-      th, td { font-size: 12px; }
+      th, td { font-size: 12px; padding: 6px; }
       input[type="text"] { width: 95%; }
+      h3 { font-size: 18px; }
     }
   </style>
 </head>
@@ -158,16 +180,12 @@
       customerTable.innerHTML = "";
 
       const customerData = JSON.parse(localStorage.getItem("customer_data")) || {};
-      const allPhones = Object.keys(balances);
+      const allPhones = [...new Set([...Object.keys(customerData), ...Object.keys(balances)])];
 
-      // 🔍 รวมทั้งชื่อและเบอร์โทรในการค้นหา
       const customers = allPhones.filter(phone => {
         const info = customerData[phone];
-        const name = info && info.name ? info.name.toLowerCase() : "";
-        return (
-          phone.includes(filter) ||
-          name.includes(filter.toLowerCase())
-        );
+        const name = info?.name?.toLowerCase() || "";
+        return phone.includes(filter) || name.includes(filter.toLowerCase());
       });
 
       if (customers.length === 0) {
@@ -176,12 +194,10 @@
       }
 
       customers.forEach((phone, index) => {
-        const info = customerData[phone];
-        const createdAt = info ? info.createdAt : "-";
-        const name = info && info.name ? info.name : "(ไม่มีชื่อ)";
-
-        const key = `transactions_${phone}`;
-        const tx = JSON.parse(localStorage.getItem(key)) || [];
+        const info = customerData[phone] || {};
+        const name = info.name || "(ไม่มีชื่อ)";
+        const createdAt = info.createdAt || "-";
+        const tx = JSON.parse(localStorage.getItem(`transactions_${phone}`)) || [];
         const latest = tx[0] ? `${tx[0].type} ${tx[0].amount}฿ (${tx[0].status})` : "-";
         const txCount = tx.length;
 
@@ -189,35 +205,29 @@
           <tr>
             <td>${index + 1}</td>
             <td><b>${name}</b><br>${phone}<br><small>${createdAt}</small></td>
-            <td>${balances[phone].toLocaleString("th-TH", { minimumFractionDigits: 2 })}</td>
+            <td>${(balances[phone] || 0).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</td>
             <td>${latest}</td>
             <td>${txCount}</td>
             <td><button class="btn-green" onclick="topUp('${phone}')">+ เติมเงิน</button></td>
             <td><button class="btn-red" onclick="withdraw('${phone}')">- ถอนเงิน</button></td>
             <td><button class="btn-blue" onclick="viewTransactions('${phone}')">ดูธุรกรรม</button></td>
-          </tr>
-        `;
+          </tr>`;
       });
     }
 
     renderCustomers();
 
     // 🔍 ค้นหาทันทีเมื่อพิมพ์
-    document.getElementById("searchInput").addEventListener("input", (e) => {
-      const searchValue = e.target.value.trim();
-      renderCustomers(searchValue);
-    });
+    document.getElementById("searchInput").addEventListener("input", e => renderCustomers(e.target.value.trim()));
 
     // 💰 เติมเงิน
     function topUp(phone) {
       const amount = parseFloat(prompt(`💸 ใส่จำนวนเงินที่ต้องการเติมให้เบอร์ ${phone}:`));
       if (isNaN(amount) || amount <= 0) return alert("⚠️ กรุณากรอกจำนวนเงินที่ถูกต้อง");
 
-      let balances = JSON.parse(localStorage.getItem("customer_balances")) || {};
-      if (!balances[phone]) balances[phone] = 0;
-      balances[phone] += amount;
+      const balances = JSON.parse(localStorage.getItem("customer_balances")) || {};
+      balances[phone] = (balances[phone] || 0) + amount;
       localStorage.setItem("customer_balances", JSON.stringify(balances));
-
       addTransaction(phone, "เติมเงิน", amount, "✅ สำเร็จ");
       alert(`✅ เติมเงินให้เบอร์ ${phone} จำนวน ${amount.toFixed(2)} บาทแล้ว`);
       renderCustomers();
@@ -226,17 +236,12 @@
     // 💸 ถอนเงิน
     function withdraw(phone) {
       const amount = parseFloat(prompt(`💰 ใส่จำนวนเงินที่ต้องการถอนจากเบอร์ ${phone}:`));
+      const balances = JSON.parse(localStorage.getItem("customer_balances")) || {};
       if (isNaN(amount) || amount <= 0) return alert("⚠️ กรุณากรอกจำนวนเงินที่ถูกต้อง");
-
-      let balances = JSON.parse(localStorage.getItem("customer_balances")) || {};
-      if (!balances[phone] || balances[phone] < amount) {
-        alert("❌ ยอดเงินไม่เพียงพอสำหรับการถอน");
-        return;
-      }
+      if (!balances[phone] || balances[phone] < amount) return alert("❌ ยอดเงินไม่เพียงพอ");
 
       balances[phone] -= amount;
       localStorage.setItem("customer_balances", JSON.stringify(balances));
-
       addTransaction(phone, "ถอนเงิน", amount, "✅ สำเร็จ");
       alert(`💸 ถอนเงินจากเบอร์ ${phone} จำนวน ${amount.toFixed(2)} บาทแล้ว`);
       renderCustomers();
@@ -246,36 +251,22 @@
     function addTransaction(phone, type, amount, status) {
       const key = `transactions_${phone}`;
       const list = JSON.parse(localStorage.getItem(key)) || [];
-      const entry = {
-        date: new Date().toLocaleString("th-TH"),
-        type,
-        amount,
-        status
-      };
-      list.unshift(entry);
+      list.unshift({ date: new Date().toLocaleString("th-TH"), type, amount, status });
       localStorage.setItem(key, JSON.stringify(list));
     }
 
-    // 👁 ดูธุรกรรมของลูกค้า
+    // 👁 ดูธุรกรรม
     function viewTransactions(phone) {
-      const key = `transactions_${phone}`;
-      const tx = JSON.parse(localStorage.getItem(key)) || [];
-      if (tx.length === 0) {
-        alert(`📞 เบอร์ ${phone}\nยังไม่มีธุรกรรมในระบบ`);
-      } else {
-        let msg = `📜 ธุรกรรมของเบอร์ ${phone}:\n\n`;
-        tx.forEach(t => {
-          msg += `• ${t.date}\n${t.type} ${t.amount}฿ - ${t.status}\n\n`;
-        });
-        alert(msg);
-      }
+      const tx = JSON.parse(localStorage.getItem(`transactions_${phone}`)) || [];
+      if (!tx.length) return alert(`📞 เบอร์ ${phone}\nยังไม่มีธุรกรรมในระบบ`);
+      alert(tx.map(t => `• ${t.date}\n${t.type} ${t.amount}฿ - ${t.status}`).join("\n\n"));
     }
 
-    // ✅ โหลดรายการเคลมพัสดุ
-    const claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
+    // ✅ โหลดรายการเคลม
     const claimTable = document.querySelector("#claimTable tbody");
+    const claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
 
-    if (claims.length === 0) {
+    if (!claims.length) {
       claimTable.innerHTML = `<tr><td colspan="8">ไม่มีรายการเคลม</td></tr>`;
     } else {
       claims.forEach((c, i) => {
@@ -292,14 +283,12 @@
               <button class="btn-green" onclick="approveClaim(${i})">อนุมัติ</button>
               <button class="btn-red" onclick="rejectClaim(${i})">ปฏิเสธ</button>
             </td>
-          </tr>
-        `;
+          </tr>`;
       });
     }
 
-    // 🟢 อนุมัติ / ปฏิเสธ เคลม
     function approveClaim(i) {
-      let claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
+      const claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
       claims[i].status = "อนุมัติ";
       localStorage.setItem("claim_requests", JSON.stringify(claims));
       document.getElementById(`status-${i}`).textContent = "อนุมัติ";
@@ -308,7 +297,7 @@
     }
 
     function rejectClaim(i) {
-      let claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
+      const claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
       claims[i].status = "ปฏิเสธ";
       localStorage.setItem("claim_requests", JSON.stringify(claims));
       document.getElementById(`status-${i}`).textContent = "ปฏิเสธ";
@@ -322,7 +311,21 @@
       alert("ออกจากระบบเรียบร้อยแล้ว");
       window.location.href = "admin-login.html";
     }
-  </script>
 
+    // 🕒 รีเซ็ตข้อมูลอัตโนมัติหลังผ่านไป 5 วัน
+    const RESET_KEY = "system_reset_time";
+    const NOW = Date.now();
+    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+    const lastReset = localStorage.getItem(RESET_KEY);
+
+    if (!lastReset) {
+      localStorage.setItem(RESET_KEY, NOW);
+    } else if (NOW - parseInt(lastReset) > FIVE_DAYS) {
+      localStorage.clear();
+      localStorage.setItem(RESET_KEY, NOW);
+      alert("⏳ ข้อมูลครบ 5 วัน ระบบได้รีเซ็ตทั้งหมดแล้ว");
+      location.reload();
+    }
+  </script>
 </body>
 </html>
