@@ -2,147 +2,105 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เข้าสู่ระบบแอดมิน | Flash Express</title>
   <link rel="icon" href="https://flashexpress.com/favicon.ico" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
-
   <style>
     body {
       font-family: "Prompt", sans-serif;
       background-color: #fffbea;
-      margin: 0;
-      padding: 0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
+      margin: 0;
     }
-
     .login-box {
       background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 400px;
+      border-radius: 16px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
       padding: 30px 25px;
       text-align: center;
-      animation: fadeIn 0.5s ease;
+      width: 320px;
+      max-width: 90%;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     h2 {
       color: #333;
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 25px;
+      margin-top: 0;
+      margin-bottom: 15px;
     }
-
-    input[type="password"], input[type="text"] {
+    input {
       width: 100%;
       padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #ccc;
+      margin-bottom: 15px;
       text-align: center;
-      font-size: 15px;
+      font-size: 16px;
       transition: 0.2s;
     }
-
     input:focus {
       outline: none;
       border-color: #ffeb3b;
-      box-shadow: 0 0 6px #ffeb3b80;
+      box-shadow: 0 0 5px rgba(255, 235, 59, 0.6);
     }
-
     button {
       width: 100%;
-      background-color: #ffeb3b;
-      border: none;
       padding: 12px;
-      border-radius: 8px;
+      border: none;
+      border-radius: 10px;
+      background-color: #ffeb3b;
       font-weight: bold;
-      font-size: 16px;
       cursor: pointer;
       transition: 0.2s;
     }
-
-    button:hover {
-      background-color: #fdd835;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 13px;
-      color: #555;
-      margin-top: 15px;
-    }
-
-    .error {
+    button:hover { background-color: #fdd835; }
+    .error-msg {
       color: red;
       font-size: 14px;
-      margin-bottom: 10px;
+      height: 18px;
+      margin-bottom: 8px;
+      visibility: hidden;
     }
-
-    @media (max-width: 600px) {
-      .login-box {
-        padding: 25px 20px;
-      }
-      h2 {
-        font-size: 20px;
-      }
+    .logo {
+      width: 80px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-
   <div class="login-box">
-    <h2>👨‍💼 เข้าสู่ระบบแอดมิน</h2>
+    <img src="009daed7-4504-4ea4-b8fd-6e7c32172f57.png" alt="Flash Express" class="logo">
+    <h2>🔐 เข้าสู่ระบบแอดมิน</h2>
 
-    <div class="error" id="errorMsg"></div>
-
-    <input type="text" id="username" placeholder="ชื่อผู้ใช้แอดมิน">
-    <input type="password" id="password" placeholder="รหัสผ่าน">
-
-    <button onclick="login()">เข้าสู่ระบบ</button>
-
-    <div class="footer">© Flash Express Admin System</div>
+    <div class="error-msg" id="errorMsg">⚠️ รหัสผ่านไม่ถูกต้อง</div>
+    <input type="password" id="password" placeholder="กรอกรหัสผ่านแอดมิน">
+    <button onclick="adminLogin()">เข้าสู่ระบบ</button>
   </div>
 
   <script>
-    // 🔐 ระบบล็อกอินแอดมิน
-    const ADMIN_USER = "admin";
-    const ADMIN_PASS = "1234"; // ← แนะนำให้เปลี่ยนเป็นรหัสจริงของคุณ
+    // ✅ รหัสผ่านที่กำหนด (สามารถเปลี่ยนได้)
+    const ADMIN_PASSWORD = "1234"; // 🔒 เปลี่ยนได้ตามต้องการ
 
-    function login() {
-      const u = document.getElementById("username").value.trim();
-      const p = document.getElementById("password").value.trim();
-      const error = document.getElementById("errorMsg");
-
-      if (u === "" || p === "") {
-        error.textContent = "⚠️ กรุณากรอกชื่อผู้ใช้และรหัสผ่าน";
-        return;
-      }
-
-      if (u === ADMIN_USER && p === ADMIN_PASS) {
-        sessionStorage.setItem("isAdminLoggedIn", "true");
-        error.style.color = "green";
-        error.textContent = "✅ เข้าสู่ระบบสำเร็จ กำลังเข้าสู่หน้าจัดการ...";
-        setTimeout(() => window.location.href = "admin.html", 1000);
-      } else {
-        error.textContent = "❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
-      }
-    }
-
-    // ถ้าเข้าสู่ระบบแล้ว -> กลับหน้า admin โดยอัตโนมัติ
+    // ✅ ถ้ามี session อยู่แล้ว เด้งเข้าหน้า admin.html ทันที
     if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
       window.location.href = "admin.html";
     }
-  </script>
 
+    function adminLogin() {
+      const pass = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (pass === ADMIN_PASSWORD) {
+        sessionStorage.setItem("isAdminLoggedIn", "true");
+        errorMsg.style.visibility = "hidden";
+        alert("✅ เข้าสู่ระบบแอดมินสำเร็จ!");
+        window.location.href = "admin.html";
+      } else {
+        errorMsg.style.visibility = "visible";
+      }
+    }
+  </script>
 </body>
 </html>

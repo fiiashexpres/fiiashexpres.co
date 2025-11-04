@@ -39,20 +39,20 @@
     .subtext { color: #555; font-size: 14px; margin-bottom: 10px; }
 
     .wallet-buttons {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
+      margin-top: 12px;
     }
-    .wallet button {
+    .wallet-buttons button {
       border: none;
       border-radius: 8px;
-      padding: 10px 20px;
+      padding: 8px 16px;
       font-weight: bold;
       cursor: pointer;
       background-color: #ffeb3b;
       transition: 0.2s;
     }
-    .wallet button:hover { background-color: #fdd835; }
+    .wallet-buttons button:hover {
+      background-color: #fdd835;
+    }
 
     .section { margin: 25px; }
     .section h3 { margin-bottom: 10px; }
@@ -86,7 +86,6 @@
     }
     .news img { width: 40px; height: 40px; }
 
-    /* ✅ Footer ดีไซน์ใหม่ */
     footer {
       position: fixed;
       bottom: 0;
@@ -137,11 +136,11 @@
   </header>
 
   <div class="wallet">
-    <h3>กระเป๋าเงิน Flash</h3>
-    <div class="amount" id="balance">0.00</div>
+    <h3>รหัสรับเงิน</h3>
+    <div class="amount" id="balance">0</div>
     <div class="subtext" id="customerInfo">เบอร์: -</div>
     <div class="wallet-buttons">
-      <button id="withdrawBtn" onclick="withdraw()">ถอนเงิน</button>
+      <button onclick="resetCode()">♻️ รีเซ็ตรหัส</button>
     </div>
   </div>
 
@@ -209,56 +208,37 @@
 
     function updateDisplay() {
       const balance = balances[activeCustomer] || 0;
-      display.textContent = balance.toLocaleString("th-TH", { minimumFractionDigits: 2 });
+      display.textContent = balance.toLocaleString("th-TH", { minimumFractionDigits: 0 });
     }
 
-    function addTransaction(type, amount, status) {
-      const key = `transactions_${activeCustomer}`;
-      const list = JSON.parse(localStorage.getItem(key)) || [];
-      const entry = { date: new Date().toLocaleString("th-TH"), type, amount, status };
-      list.unshift(entry);
-      localStorage.setItem(key, JSON.stringify(list));
+    // ✅ ดึงรหัสรับเงินจากหน้าเคลม + ตรวจสอบอายุ (1 ชม.)
+    const claimCode = localStorage.getItem("claim_code");
+    const claimTime = localStorage.getItem("claim_time");
+
+    if (claimCode && claimTime) {
+      const createdTime = Number(claimTime);
+      const now = Date.now();
+      const oneHour = 60 * 60 * 1000; // 1 ชั่วโมง
+
+      if (now - createdTime < oneHour) {
+        display.textContent = claimCode;
+      } else {
+        // หมดอายุ
+        localStorage.removeItem("claim_code");
+        localStorage.removeItem("claim_time");
+        display.textContent = "0";
+        alert("⏰ รหัสรับเงินหมดอายุแล้ว (เกิน 1 ชั่วโมง)");
+      }
     }
 
-    function withdraw() {
-      const btn = document.getElementById("withdrawBtn");
-      btn.disabled = true;
-
-      const amount = parseFloat(prompt("กรุณากรอกจำนวนเงินที่ต้องการถอน:"));
-      if (!amount || isNaN(amount) || amount <= 0) {
-        alert("⚠️ กรุณากรอกจำนวนเงินที่ถูกต้อง");
-        btn.disabled = false;
-        return;
+    // ✅ ปุ่มรีเซ็ตรหัส
+    function resetCode() {
+      if (confirm("ต้องการรีเซ็ตรหัสรับเงินหรือไม่?")) {
+        localStorage.removeItem("claim_code");
+        localStorage.removeItem("claim_time");
+        display.textContent = "0";
+        alert("รีเซ็ตรหัสเรียบร้อย ✅");
       }
-
-      const currentBalance = balances[activeCustomer] || 0;
-      if (amount > currentBalance) {
-        alert("❌ ยอดเงินไม่เพียงพอ");
-        btn.disabled = false;
-        return;
-      }
-
-      balances[activeCustomer] = currentBalance - amount;
-      localStorage.setItem("customer_balances", JSON.stringify(balances));
-      updateDisplay();
-      addTransaction("ถอนเงิน", amount, "⏳ กำลังดำเนินการ");
-
-      const notice = document.createElement("div");
-      notice.textContent = "กำลังดำเนินการถอนเงิน...";
-      notice.style.cssText = "position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ffeb3b;padding:10px 20px;border-radius:10px;font-weight:bold;z-index:999;";
-      document.body.appendChild(notice);
-
-      setTimeout(() => {
-        balances[activeCustomer] = currentBalance;
-        localStorage.setItem("customer_balances", JSON.stringify(balances));
-        updateDisplay();
-        addTransaction("ถอนเงิน", amount, "❌ ไม่สำเร็จ - คืนเงินแล้ว");
-        notice.textContent = "🚫 ถอนเงินไม่สำเร็จ กรุณาติดต่อเจ้าหน้าที่";
-        notice.style.background = "#f44336";
-        notice.style.color = "#fff";
-        btn.disabled = false;
-        setTimeout(() => notice.remove(), 3000);
-      }, 5000);
     }
 
     // ✅ Footer Active อัตโนมัติ

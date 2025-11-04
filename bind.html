@@ -119,7 +119,7 @@
   <input type="text" id="accountOwner" placeholder="ชื่อเจ้าของบัญชี">
 
   <button onclick="saveBank()">บันทึกข้อมูล</button>
-  <a href="index.html">← กลับหน้าหลัก</a>
+  <a href="account.html">← กลับหน้าผู้ใช้งาน</a>
 
   <script>
     // ✅ ตรวจสอบว่าเข้าสู่ระบบหรือยัง
@@ -128,6 +128,18 @@
       alert("⚠️ กรุณาเข้าสู่ระบบก่อนใช้งานหน้านี้");
       window.location.href = "login-customer.html";
     }
+
+    // ✅ โหลดข้อมูลเก่าถ้ามี
+    const bankKey = `bank_info_${activeCustomer}`;
+    const existingBank = JSON.parse(localStorage.getItem(bankKey)) || {
+      bankName: "",
+      accountNumber: "",
+      accountOwner: ""
+    };
+
+    document.getElementById("bankName").value = existingBank.bankName;
+    document.getElementById("accountNumber").value = existingBank.accountNumber;
+    document.getElementById("accountOwner").value = existingBank.accountOwner;
 
     // ✅ ฟังก์ชันบันทึกข้อมูลบัญชีธนาคาร
     function saveBank() {
@@ -142,13 +154,12 @@
       }
 
       // ✅ บันทึกข้อมูลลง localStorage โดยใช้ key แยกตามเบอร์โทร
-      const key = `bank_info_${activeCustomer}`;
       const bankData = { bankName, accountNumber, accountOwner };
-      localStorage.setItem(key, JSON.stringify(bankData));
+      localStorage.setItem(bankKey, JSON.stringify(bankData));
 
       // แจ้งเตือนสำเร็จและไปหน้า account.html
       alert("✅ บันทึกข้อมูลบัญชีสำเร็จ!");
-      window.location.href = "account.html?from=bind";
+      window.location.href = "account.html?from=bank"; // ไปหน้า บัญชีของฉัน
     }
   </script>
 

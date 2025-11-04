@@ -29,14 +29,14 @@
       z-index: 10;
     }
 
-    h2 {
+    h3 {
       margin-top: 25px;
       color: #000;
     }
 
     input {
       display: block;
-      margin: 12px auto;
+      margin: 10px auto;
       padding: 12px;
       width: 85%;
       max-width: 340px;
@@ -61,7 +61,7 @@
       padding: 12px 25px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: 15px;
       font-size: 16px;
       transition: all 0.2s ease;
     }
@@ -102,8 +102,8 @@
         padding: 12px;
         font-size: 15px;
       }
-      h2 {
-        font-size: 17px;
+      h3 {
+        font-size: 16px;
       }
     }
   </style>
@@ -112,14 +112,14 @@
 
   <header>📝 อัปเดตข้อมูลผู้ใช้</header>
 
-  <h2>กรอกข้อมูลของคุณ</h2>
+  <h3>กรอกข้อมูลของคุณ</h3>
 
   <input type="text" id="fullname" placeholder="ชื่อ-นามสกุล">
   <input type="text" id="phone" placeholder="เบอร์โทรศัพท์" disabled>
   <input type="email" id="email" placeholder="อีเมล">
 
   <button onclick="saveInfo()">บันทึกข้อมูล</button>
-  <a href="index.html">← กลับหน้าหลัก</a>
+  <a href="account.html">← กลับหน้าผู้ใช้งาน</a>
 
   <script>
     // ✅ ตรวจสอบผู้ใช้ล็อกอิน
@@ -129,7 +129,7 @@
       window.location.href = "login-customer.html";
     }
 
-    // โหลดข้อมูลเดิม (ถ้ามี)
+    // ✅ โหลดข้อมูลเดิม (ถ้ามี)
     const key = `user_info_${activeCustomer}`;
     const existingData = JSON.parse(localStorage.getItem(key)) || {
       name: "",
@@ -153,12 +153,12 @@
         return;
       }
 
-      // ✅ เก็บข้อมูลแบบแยกตามเบอร์โทร
+      // ✅ เก็บข้อมูลลง localStorage
       const userData = { name, phone, email };
       localStorage.setItem(key, JSON.stringify(userData));
 
       alert("✅ บันทึกข้อมูลสำเร็จ!");
-      window.location.href = "account.html?from=update"; // ไปหน้า บัญชี
+      window.location.href = "account.html?from=update"; // ไปหน้า บัญชีผู้ใช้
     }
   </script>
 
